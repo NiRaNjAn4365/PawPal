@@ -10,9 +10,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.pawpal.navigation.MainNavGraph
+import androidx.navigation.navArgument
+import com.example.pawpal.navigation.Screens
 
 @Composable
 fun MainScreen() {
@@ -20,8 +24,7 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val bottomBarRoutes = listOf("home","chat", "profile")
-    val showBottomBar = bottomBarRoutes.any { currentRoute?.startsWith(it) == true }
+    val showBottomBar = listOf(Screens.HomeScreen.route, Screens.ChatScreen.route, Screens.ProfileScreen.route).contains(currentRoute)
 
     Scaffold(
         bottomBar = {
@@ -30,7 +33,26 @@ fun MainScreen() {
             }
         }
     ) { innerPadding ->
-        MainNavGraph(navController = navController, modifier = Modifier.padding(innerPadding))
+        NavHost(
+            navController = navController,
+            startDestination = Screens.HomeScreen.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(Screens.HomeScreen.route) { HomeScreen(navController, Modifier) }
+            composable(Screens.ChatScreen.route) { ChatScreen(navController, Modifier) }
+            composable(Screens.ProfileScreen.route) { ProfileScreen(navController, Modifier) }
+            composable(Screens.AddPet.route) { AddPetScreen(navController) }
+
+            composable(Screens.PersonalChatScreen.route) { PersonalChatScreen() }
+
+            composable(
+                route = Screens.DetailScreen.route + "/{petId}",
+                arguments = listOf(navArgument("petId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val petId = backStackEntry.arguments?.getString("petId") ?: ""
+                PetDetailScreen(petId = petId)
+            }
+        }
     }
 }
 
@@ -40,20 +62,20 @@ fun BottomNavigationBar(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val items = listOf(
-        BottomNavItem("home", Icons.Default.Home, "Home"),
-        BottomNavItem("add_pet", Icons.Default.Add,"Add Pet"),
-        BottomNavItem("chat", Icons.Default.Chat, "Chat"),
-        BottomNavItem("profile", Icons.Default.Person, "Profile")
+        BottomNavItem(Screens.HomeScreen.route, Icons.Default.Home, "Home"),
+        BottomNavItem(Screens.AddPet.route, Icons.Default.Add, "Add Pet"),
+        BottomNavItem(Screens.ChatScreen.route, Icons.Default.Chat, "Chat"),
+        BottomNavItem(Screens.ProfileScreen.route, Icons.Default.Person, "Profile")
     )
 
     NavigationBar {
         items.forEach { item ->
             NavigationBarItem(
-                selected = false,
+                selected = currentRoute == item.route,
                 onClick = {
                     if (currentRoute != item.route) {
                         navController.navigate(item.route) {
-                            popUpTo("home") { inclusive = false }
+                            popUpTo(Screens.HomeScreen.route) { inclusive = false }
                             launchSingleTop = true
                         }
                     }

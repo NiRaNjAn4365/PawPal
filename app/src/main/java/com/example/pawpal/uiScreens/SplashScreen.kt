@@ -26,11 +26,13 @@ import com.example.pawpal.navigation.Screens
 import kotlinx.coroutines.delay
 
 @Composable
+
 fun SplashScreen(navController: NavController) {
         LaunchedEffect(Unit) {
                 delay(3000)
-                navController.navigate(Screens.HomeScreen.route) {
-                        popUpTo("splash") { inclusive = true }
+
+                navController.navigate(Screens.LoginScreen.route) {
+                        popUpTo(Screens.SplashScreen.route) { inclusive = true }
                 }
         }
 
@@ -40,9 +42,7 @@ fun SplashScreen(navController: NavController) {
                         .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
         ) {
-                Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                                 imageVector = Icons.Filled.Pets,
                                 contentDescription = "Paw Icon",

@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -21,7 +20,7 @@ import com.example.pawpal.R
 import com.example.pawpal.navigation.Screens
 
 @Composable
-fun ChatScreen(navController: NavController) {
+fun ChatScreen(navController: NavController, modifier: Modifier) {
     val names = listOf("John Deep", "Harry Troop", "Gary Oak", "Alice Wonderland", "Emma James")
     LazyColumn(
         modifier = Modifier
