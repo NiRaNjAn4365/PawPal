@@ -58,6 +58,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation("com.google.firebase:firebase-firestore")
+    implementation ("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-appcheck")
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.1")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")

@@ -12,7 +12,6 @@ import com.example.pawpal.authentication.authScreen.SignUpScreen
 import com.example.pawpal.uiScreens.AddPetScreen
 import com.example.pawpal.uiScreens.ChatScreen
 import com.example.pawpal.uiScreens.MainScreen
-import com.example.pawpal.uiScreens.PersonalChatScreen
 import com.example.pawpal.uiScreens.PetDetailScreen
 import com.example.pawpal.uiScreens.ProfileScreen
 import com.example.pawpal.uiScreens.SplashScreen
@@ -41,22 +40,24 @@ fun NavigationScreen(navController: NavHostController) {
         }
 
         composable(Screens.ChatScreen.route) { ChatScreen(
-            navController,
-            Modifier
+            navController
         ) }
         composable(Screens.ProfileScreen.route) { ProfileScreen(
             navController,
             Modifier
         ) }
         composable(Screens.AddPet.route) { AddPetScreen(navController) }
-        composable(Screens.PersonalChatScreen.route) { PersonalChatScreen() }
+
 
         composable(
             route = Screens.DetailScreen.route + "/{petId}",
             arguments = listOf(navArgument("petId") { type = NavType.StringType })
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getString("petId") ?: ""
-            PetDetailScreen(petId = petId)
+            PetDetailScreen(
+                petId = petId,
+                navController = navController
+            )
         }
     }
 }

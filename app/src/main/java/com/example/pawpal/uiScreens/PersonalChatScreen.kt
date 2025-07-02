@@ -13,17 +13,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pawpal.models.Message
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 
 @Composable
-fun PersonalChatScreen() {
+fun PersonalChatScreen(chatId: String) {
     var message by remember { mutableStateOf("") }
-    val messages = remember {
-        mutableStateListOf(
-            Message("Hey there!", false),
-            Message("Hi! How can I help?", true),
-            Message("I’m looking to adopt a pet.", false),
-            Message("Sure, I can assist with that.", true)
-        )
+    val messages = remember { mutableStateListOf<Message>() }
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+    val dbRef = FirebaseDatabase.getInstance().getReference("chats").child(chatId)
+
+    LaunchedEffect(chatId) {
+        dbRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                messages.clear()
+                for (child in snapshot.children) {
+                    val msg = child.getValue(Message::class.java)
+                    if (msg != null) {
+                        messages.add(msg)
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -34,8 +48,8 @@ fun PersonalChatScreen() {
             reverseLayout = true
         ) {
             items(messages.reversed()) { msg ->
-                ChatBubble(message = msg)
-                Spacer(modifier = Modifier.height(4.dp))
+                val isFromCurrentUser = msg.senderId == currentUserId
+                ChatBubble(message = msg.text, isFromCurrentUser = isFromCurrentUser)
             }
         }
 
@@ -54,7 +68,8 @@ fun PersonalChatScreen() {
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
                 if (message.isNotBlank()) {
-                    messages.add(Message(message, true))
+                    val newMessage = Message(message, currentUserId)
+                    dbRef.push().setValue(newMessage)
                     message = ""
                 }
             }) {
@@ -65,9 +80,9 @@ fun PersonalChatScreen() {
 }
 
 @Composable
-fun ChatBubble(message: Message) {
-    val alignment = if (message.isFromCurrentUser) Arrangement.End else Arrangement.Start
-    val bubbleColor = if (message.isFromCurrentUser) Color(0xFFDCF8C6) else Color.White
+fun ChatBubble(message: String, isFromCurrentUser: Boolean) {
+    val alignment = if (isFromCurrentUser) Arrangement.End else Arrangement.Start
+    val bubbleColor = if (isFromCurrentUser) Color(0xFFDCF8C6) else Color.White
 
     Row(
         modifier = Modifier
@@ -77,15 +92,12 @@ fun ChatBubble(message: Message) {
     ) {
         Box(
             modifier = Modifier
-                .background(
-                    color = bubbleColor,
-                    shape = RoundedCornerShape(16.dp)
-                )
+                .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
                 .padding(12.dp)
                 .widthIn(max = 280.dp)
         ) {
             Text(
-                text = message.text,
+                text = message,
                 fontSize = 16.sp,
                 color = Color.Black
             )

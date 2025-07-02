@@ -23,16 +23,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawpal.navigation.Screens
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
 @Composable
 
 fun SplashScreen(navController: NavController) {
+        val auth= FirebaseAuth.getInstance().currentUser
         LaunchedEffect(Unit) {
                 delay(3000)
-
-                navController.navigate(Screens.LoginScreen.route) {
-                        popUpTo(Screens.SplashScreen.route) { inclusive = true }
+                if (auth != null) {
+                        navController.navigate(Screens.HomeScreen.route) {
+                                popUpTo(Screens.SplashScreen.route) { inclusive = true }
+                        }
+                }
+                else{
+                        navController.navigate(Screens.LoginScreen.route) {
+                                popUpTo(Screens.SplashScreen.route) { inclusive = true }
+                        }
                 }
         }
 
@@ -66,3 +74,4 @@ fun SplashScreen(navController: NavController) {
                 }
         }
 }
+

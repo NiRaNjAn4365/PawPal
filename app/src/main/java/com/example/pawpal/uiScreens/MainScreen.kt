@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.pawpal.authentication.authScreen.LoginScreen
 import com.example.pawpal.navigation.Screens
 
 @Composable
@@ -39,18 +40,27 @@ fun MainScreen() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screens.HomeScreen.route) { HomeScreen(navController, Modifier) }
-            composable(Screens.ChatScreen.route) { ChatScreen(navController, Modifier) }
+            composable(Screens.ChatScreen.route) { ChatScreen(navController) }
             composable(Screens.ProfileScreen.route) { ProfileScreen(navController, Modifier) }
             composable(Screens.AddPet.route) { AddPetScreen(navController) }
-
-            composable(Screens.PersonalChatScreen.route) { PersonalChatScreen() }
-
+            composable(Screens.LoginScreen.route) {
+                LoginScreen(navController) {
+                    navController.navigate(Screens.RegisterScreen.route)
+                }
+            }
+            composable(
+                route = Screens.PersonalChatScreen.route + "/{chatId}",
+                arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+                PersonalChatScreen(chatId = chatId)
+            }
             composable(
                 route = Screens.DetailScreen.route + "/{petId}",
                 arguments = listOf(navArgument("petId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val petId = backStackEntry.arguments?.getString("petId") ?: ""
-                PetDetailScreen(petId = petId)
+                PetDetailScreen(petId = petId, navController = navController)
             }
         }
     }

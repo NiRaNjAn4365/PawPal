@@ -43,7 +43,6 @@ class AuthViewModel : ViewModel() {
                         "name" to name,
                         "email" to email,
                         "uid" to userId
-                        // Do NOT store password
                     )
 
                     firestore.collection("users")
@@ -90,7 +89,6 @@ class AuthViewModel : ViewModel() {
     }
 }
 
-// Sealed class to represent UI states
 sealed class AuthState {
     object Authenticated : AuthState()
     object UnAuthenticated : AuthState()

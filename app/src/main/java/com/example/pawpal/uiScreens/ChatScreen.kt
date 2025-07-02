@@ -1,69 +1,86 @@
 package com.example.pawpal.uiScreens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.pawpal.R
-import com.example.pawpal.navigation.Screens
+import com.example.pawpal.models.ChatUser
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.database.*
+import com.google.firebase.firestore.firestore
 
 @Composable
-fun ChatScreen(navController: NavController, modifier: Modifier) {
-    val names = listOf("John Deep", "Harry Troop", "Gary Oak", "Alice Wonderland", "Emma James")
+fun ChatScreen(navController: NavController) {
+    val chatUsers = remember { mutableStateListOf<ChatUser>() }
+    val currentUserId = Firebase.auth.currentUser?.uid ?: return
+
+    val firestore = Firebase.firestore
+    val chatsRef = FirebaseDatabase.getInstance().getReference("chats")
+
+    LaunchedEffect(Unit) {
+        chatsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                chatUsers.clear()
+                for (chatSnapshot in snapshot.children) {
+                    val chatId = chatSnapshot.key ?: continue
+                    val userIds = chatId.split("_")
+                    if (userIds.contains(currentUserId)) {
+                        val otherUserId = userIds.firstOrNull { it != currentUserId } ?: continue
+
+                        firestore.collection("users").document(otherUserId).get()
+                            .addOnSuccessListener { res ->
+                                val name = res.getString("name") ?: "User"
+                                val chatUser = ChatUser(uid = otherUserId, name = name)
+
+                                if (chatUser !in chatUsers) {
+                                    chatUsers.add(chatUser)
+                                }
+                            }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 6.dp, vertical = 38.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(16.dp)
     ) {
-        items(names) { name ->
-            ChatModule(name,navController)
+        items(chatUsers) { user ->
+            ChatModule(name = user.name, uid = user.uid, navController = navController)
         }
     }
 }
-
 @Composable
-fun ChatModule(name: String,navController: NavController) {
+fun ChatModule(name: String, uid: String, navController: NavController) {
+    val currentUserId = Firebase.auth.currentUser?.uid ?: return
+    val chatId = listOf(currentUserId, uid).sorted().joinToString("_")
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clickable(onClick = {
-                navController.navigate(Screens.PersonalChatScreen.route)
-            }),
-        verticalAlignment = Alignment.CenterVertically
+            .clickable {
+                navController.navigate("personal_chat_screen/$chatId")
+            }
+            .padding(12.dp)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_background),
-            contentDescription = "Profile picture",
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
+        Icon(Icons.Default.Person, contentDescription = null)
+        Spacer(modifier = Modifier.width(8.dp))
         Column {
-            Text(
-                text = name,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = "Start a conversation with $name"
-                , fontWeight = FontWeight.W200
-
-            )
+            Text(text = name, fontWeight = FontWeight.Bold)
+            Text("Tap to chat")
         }
     }
 }
