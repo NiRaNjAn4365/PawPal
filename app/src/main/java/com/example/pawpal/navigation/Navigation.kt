@@ -24,7 +24,7 @@ fun NavigationScreen(navController: NavHostController) {
         }
 
         composable(Screens.RegisterScreen.route) {
-            SignUpScreen {
+            SignUpScreen (navController){
                 navController.navigate(Screens.LoginScreen.route)
             }
         }

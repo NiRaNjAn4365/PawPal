@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,13 +54,23 @@ fun ChatScreen(navController: NavController) {
         })
     }
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        items(chatUsers) { user ->
-            ChatModule(name = user.name, uid = user.uid, navController = navController)
+        if (chatUsers.isEmpty()) {
+            Text(
+                text = "No chats yet. Start a conversation! Select any Card > Owner Details > Click on Chat Icon to start new Chat",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LazyColumn {
+                items(chatUsers) { user ->
+                    ChatModule(name = user.name, uid = user.uid, navController = navController)
+                }
+            }
         }
     }
 }

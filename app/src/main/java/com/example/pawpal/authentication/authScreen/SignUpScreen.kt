@@ -1,5 +1,6 @@
 package com.example.pawpal.authentication.authScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,10 +38,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.pawpal.navigation.Screens
 import com.example.pawpal.viewModel.AuthViewModel
 
 @Composable
 fun SignUpScreen(
+    navController: NavController,
     onNavigateToLogin: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -128,6 +132,7 @@ fun SignUpScreen(
                 onClick = {
                     if (name.isNotBlank() && email.isNotBlank() && password.length >= 6) {
                         authViewModel.signUpUser(name,email,password)
+                        navController.navigate(Screens.LoginScreen.route)
                     }
                 },
                 modifier = Modifier
@@ -158,9 +163,3 @@ fun SignUpScreen(
         }
     }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewSign(){
-    SignUpScreen(
-     onNavigateToLogin = {})
-}

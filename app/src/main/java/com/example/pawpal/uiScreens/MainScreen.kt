@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.pawpal.authentication.authScreen.LoginScreen
+import com.example.pawpal.authentication.authScreen.SignUpScreen
 import com.example.pawpal.navigation.Screens
 
 @Composable
@@ -46,6 +47,11 @@ fun MainScreen() {
             composable(Screens.LoginScreen.route) {
                 LoginScreen(navController) {
                     navController.navigate(Screens.RegisterScreen.route)
+                }
+            }
+            composable(Screens.RegisterScreen.route) {
+                SignUpScreen (navController){
+                    navController.navigate(Screens.LoginScreen.route)
                 }
             }
             composable(
